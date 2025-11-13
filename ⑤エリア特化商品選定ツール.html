@@ -1,0 +1,1668 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>エリア特化商品選定ツール</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: "Hiragino Sans", "Yu Gothic", "Meiryo", "MS PGothic", sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        /* スプラッシュスクリーン */
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1F5F8B 0%, #2C7FB8 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 20000;
+        }
+        
+        .splash-content {
+            text-align: center;
+        }
+        
+        .splash-title {
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 40px;
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out 0.2s forwards;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .chart-animation {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 8px;
+            height: 120px;
+            margin-bottom: 30px;
+        }
+        
+        .bar {
+            width: 20px;
+            background: white;
+            border-radius: 3px 3px 0 0;
+            opacity: 0.9;
+            animation: growBar 0.8s ease-out forwards;
+        }
+        
+        .bar:nth-child(1) {
+            height: 60px;
+            animation-delay: 0.3s;
+        }
+        
+        .bar:nth-child(2) {
+            height: 90px;
+            animation-delay: 0.4s;
+        }
+        
+        .bar:nth-child(3) {
+            height: 45px;
+            animation-delay: 0.5s;
+        }
+        
+        .bar:nth-child(4) {
+            height: 75px;
+            animation-delay: 0.6s;
+        }
+        
+        .bar:nth-child(5) {
+            height: 100px;
+            animation-delay: 0.7s;
+        }
+        
+        .bar:nth-child(6) {
+            height: 55px;
+            animation-delay: 0.8s;
+        }
+        
+        @keyframes growBar {
+            from {
+                transform: scaleY(0);
+                opacity: 0;
+            }
+            to {
+                transform: scaleY(1);
+                opacity: 0.9;
+            }
+        }
+        
+        .loading-text {
+            color: white;
+            font-size: 14px;
+            opacity: 0;
+            animation: fadeIn 0.5s ease-out 1.5s forwards;
+        }
+        
+        @keyframes fadeIn {
+            to {
+                opacity: 0.8;
+            }
+        }
+        
+        /* モーダル */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+        
+        .modal {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 600px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        
+        .modal h2 {
+            color: #222;
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .modal-content {
+            margin-bottom: 25px;
+            line-height: 1.8;
+            color: #555;
+        }
+        
+        .library-list {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+            border-left: 4px solid #1F5F8B;
+        }
+        
+        .library-list ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .library-list li {
+            margin: 8px 0;
+            color: #333;
+        }
+        
+        .security-info {
+            background: #e8f5e9;
+            padding: 12px;
+            border-radius: 4px;
+            margin: 15px 0;
+            border-left: 4px solid #4CAF50;
+            font-size: 14px;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #1F5F8B;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #164563;
+        }
+        
+        .btn-secondary {
+            background: #ddd;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #ccc;
+        }
+        
+        .container {
+            max-width: 1900px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #222;
+            margin-bottom: 30px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .btn-success {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #45a049;
+        }
+        
+        .loading-message {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #1F5F8B;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            background: #ffebee;
+            padding: 20px;
+            border-radius: 4px;
+            border-left: 4px solid #f44336;
+            color: #c62828;
+            margin-bottom: 20px;
+        }
+        
+        .upload-area {
+            border: 3px dashed #ccc;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .upload-area:hover {
+            border-color: #1F5F8B;
+            background: #f9f9f9;
+        }
+        
+        .upload-area.dragover {
+            border-color: #1F5F8B;
+            background: #e3f2fd;
+        }
+        
+        .upload-area h3 {
+            color: #222;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .filters-section {
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+        
+        .filters-section h3 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #222;
+            font-weight: bold;
+        }
+        
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .filter-group label {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .filter-group select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            background: white;
+        }
+        
+        .filter-group select[multiple] {
+            padding: 5px;
+        }
+        
+        .filter-group select:disabled {
+            background: #f0f0f0;
+            cursor: not-allowed;
+        }
+        
+        .metrics-selector {
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+        
+        .metrics-selector h3 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #222;
+            font-weight: bold;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 10px;
+        }
+        
+        .metric-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .metric-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .metric-checkbox label {
+            cursor: pointer;
+            font-size: 13px;
+            user-select: none;
+            color: #333;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            font-size: 13px;
+        }
+        
+        thead {
+            background: #1F5F8B;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        th {
+            padding: 12px 8px;
+            text-align: left;
+            font-weight: bold;
+            border-bottom: 2px solid #164563;
+            white-space: nowrap;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+        
+        th:hover {
+            background: #164563;
+        }
+        
+        .sort-icon {
+            margin-left: 5px;
+            font-size: 10px;
+            opacity: 0.6;
+        }
+        
+        .filter-input {
+            width: 100%;
+            padding: 4px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        
+        td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #eee;
+            white-space: nowrap;
+            color: #222;
+        }
+        
+        tbody tr:hover {
+            background: #f5f5f5;
+        }
+        
+        tbody tr:nth-child(even) {
+            background: #fafafa;
+        }
+        
+        tbody tr:nth-child(even):hover {
+            background: #f0f0f0;
+        }
+        
+        .number-cell {
+            text-align: right;
+        }
+        
+        .highlight-high {
+            background: #e8f5e9;
+            font-weight: bold;
+        }
+        
+        .highlight-low {
+            background: #ffebee;
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-style: italic;
+        }
+        
+        .info-box {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border-left: 4px solid #1F5F8B;
+        }
+        
+        .info-box p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #222;
+            font-weight: 500;
+        }
+        
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #1F5F8B 0%, #2a7db5 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .stat-label {
+            font-size: 13px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .checkbox-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- スプラッシュスクリーン -->
+    <div id="splashScreen" class="splash-screen">
+        <div class="splash-content">
+            <div class="splash-title">エリア特化商品選定ツール</div>
+            <div class="chart-animation">
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+            </div>
+            <div class="loading-text">Loading...</div>
+        </div>
+    </div>
+    
+    <!-- ライブラリ読み込み確認モーダル -->
+    <div id="confirmModal" class="modal-overlay hidden">
+        <div class="modal">
+            <h2>外部ライブラリの読み込み確認</h2>
+            <div class="modal-content">
+                <p>このツールを使用するには、以下のJavaScriptライブラリを外部から読み込む必要があります:</p>
+                
+                <div class="library-list">
+                    <ul>
+                        <li><strong>XLSX.js (v0.18.5)</strong> - Excel/CSVファイル処理用</li>
+                        <li><strong>Papa Parse (v5.3.2)</strong> - CSVファイル解析用</li>
+                    </ul>
+                </div>
+                
+                <div class="security-info">
+                    <strong>接続情報:</strong><br>
+                    ・接続先: https://cdnjs.cloudflare.com (Cloudflare公式CDN)<br>
+                    ・アップロードしたデータは外部に送信されません<br>
+                    ・すべての処理はブラウザ内で完結します
+                </div>
+                
+                <p style="color: #666; font-size: 13px; margin-top: 15px;">
+                    ※ライブラリは毎回のツール起動時に読み込まれ、ブラウザ内でのみ動作します。<br>
+                    ※本ツール内で利用されるCDN(Content Delivery Network)経由で提供される外部ライブラリについては、その安全性、可用性、正確性、およびツールの機能に与える影響を含め、一切の責任を負いません。
+                </p>
+            </div>
+            
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" id="cancelBtn">キャンセル</button>
+                <button class="btn btn-primary" id="approveBtn">記載事項に同意してライブラリを読み込む</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>エリア特化商品選定ツール</h1>
+
+        <div id="loadingMessage" class="loading-message hidden">
+            <div class="loading-spinner"></div>
+            <p>ライブラリを読み込んでいます...</p>
+        </div>
+
+        <div id="errorContainer"></div>
+
+        <div id="mainApp" class="hidden">
+            <div class="upload-area" id="uploadArea">
+                <h3>POSデータをアップロード</h3>
+                <p>CSV/Excelファイルをドラッグ＆ドロップ、またはクリックしてファイルを選択</p>
+                <input type="file" id="fileInput" accept=".csv,.tsv,.xlsx,.xls" style="display: none;">
+            </div>
+
+            <div id="filterSection" style="display: none;">
+                <div class="filters-section">
+                    <h3>分析条件設定</h3>
+                    
+                    <div class="filters">
+                        <div class="filter-group">
+                            <label for="areaSelect">エリア選択（複数選択可）</label>
+                            <select id="areaSelect" multiple size="5">
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="majorCategorySelect">大分類（複数選択可）</label>
+                            <select id="majorCategorySelect" multiple size="5">
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="middleCategorySelect">中分類（複数選択可）</label>
+                            <select id="middleCategorySelect" multiple size="5">
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="minorCategorySelect">小分類（複数選択可）</label>
+                            <select id="minorCategorySelect" multiple size="5">
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="subCategorySelect">細分類（複数選択可）</label>
+                            <select id="subCategorySelect" multiple size="5">
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="rpiBaseSelect">RPI母数算出基準</label>
+                            <select id="rpiBaseSelect">
+                                <option value="major">大分類粒度</option>
+                                <option value="middle">中分類粒度</option>
+                                <option value="minor" selected>小分類粒度</option>
+                                <option value="sub">細分類粒度</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metrics-selector">
+                    <h3>表示項目選択</h3>
+                    <p style="font-size: 13px; color: #666; margin-bottom: 10px;">※基本項目は常に表示されます</p>
+                    <div class="metrics-grid">
+                        <div class="metric-checkbox">
+                            <input type="checkbox" id="col_amount">
+                            <label for="col_amount">金額</label>
+                        </div>
+                        <div class="metric-checkbox">
+                            <input type="checkbox" id="col_quantity">
+                            <label for="col_quantity">数量</label>
+                        </div>
+                        <div class="metric-checkbox">
+                            <input type="checkbox" id="col_avgPrice">
+                            <label for="col_avgPrice">平均価格</label>
+                        </div>
+                        <div class="metric-checkbox">
+                            <input type="checkbox" id="col_amountPI">
+                            <label for="col_amountPI">金額PI値</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="executeAnalysis()">分析実行</button>
+                    <button class="btn btn-success" onclick="downloadExcel()" id="downloadBtn" style="display: none;">Excelダウンロード</button>
+                </div>
+            </div>
+
+            <div id="resultsSection" style="display: none;">
+                <div class="info-box" id="infoBox"></div>
+
+                <div class="table-container">
+                    <table id="resultsTable">
+                        <thead id="tableHeader"></thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // スプラッシュスクリーン制御
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('splashScreen').style.display = 'none';
+                document.getElementById('confirmModal').classList.remove('hidden');
+            }, 2500);
+        });
+        
+        // ライブラリ定義
+        const libraries = [
+            {
+                name: 'XLSX',
+                url: 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
+                check: () => typeof XLSX !== 'undefined'
+            },
+            {
+                name: 'Papa Parse',
+                url: 'https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js',
+                check: () => typeof Papa !== 'undefined'
+            }
+        ];
+        
+        // モーダルボタンイベント
+        document.getElementById('approveBtn').addEventListener('click', loadLibraries);
+        document.getElementById('cancelBtn').addEventListener('click', handleCancel);
+        
+        function loadLibraries() {
+            document.getElementById('confirmModal').classList.add('hidden');
+            document.getElementById('loadingMessage').classList.remove('hidden');
+            
+            const promises = libraries.map(lib => loadScript(lib));
+            
+            Promise.all(promises)
+                .then(() => {
+                    document.getElementById('loadingMessage').classList.add('hidden');
+                    document.getElementById('mainApp').classList.remove('hidden');
+                    initializeApp();
+                })
+                .catch(error => {
+                    document.getElementById('loadingMessage').classList.add('hidden');
+                    showError(`ライブラリの読み込みに失敗しました: ${error.message}`);
+                });
+        }
+        
+        function loadScript(lib) {
+            return new Promise((resolve, reject) => {
+                if (lib.check()) {
+                    resolve();
+                    return;
+                }
+                
+                const script = document.createElement('script');
+                script.src = lib.url;
+                
+                script.onload = () => {
+                    if (lib.check()) {
+                        console.log(`✓ ${lib.name} loaded successfully`);
+                        resolve();
+                    } else {
+                        reject(new Error(`${lib.name} failed to initialize`));
+                    }
+                };
+                
+                script.onerror = () => {
+                    reject(new Error(`Failed to load ${lib.name} from ${lib.url}`));
+                };
+                
+                document.head.appendChild(script);
+            });
+        }
+        
+        function handleCancel() {
+            alert('ツールの使用にはライブラリの読み込みが必要です。');
+        }
+        
+        function initializeApp() {
+            // アプリケーション初期化処理
+            setupFileUpload();
+        }
+        
+        function setupFileUpload() {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+
+            uploadArea.addEventListener('click', () => fileInput.click());
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const file = e.dataTransfer.files[0];
+                if (file) handleFile(file);
+            });
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) handleFile(file);
+            });
+        }
+        let rawData = [];
+        let filteredData = [];
+        let displayData = [];
+        let sortConfig = { column: null, direction: 'asc' };
+        let filterValues = {};
+
+        function handleFile(file) {
+            showError('');
+            
+            const fileName = file.name.toLowerCase();
+            const fileExtension = fileName.substring(fileName.lastIndexOf('.'));
+            
+            if (['.csv', '.tsv'].includes(fileExtension)) {
+                // CSVファイルの処理
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const text = e.target.result;
+                    parseCSV(text);
+                };
+                reader.onerror = () => {
+                    showError('ファイルの読み込みに失敗しました。');
+                };
+                reader.readAsText(file, 'UTF-8');
+            } else if (['.xlsx', '.xls'].includes(fileExtension)) {
+                // Excelファイルの処理
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const firstSheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[firstSheetName];
+                        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                        
+                        if (jsonData.length === 0) {
+                            showError('Excelファイルにデータが見つかりませんでした。');
+                            return;
+                        }
+                        
+                        processData(jsonData);
+                    } catch (error) {
+                        showError('Excelファイルの解析に失敗しました: ' + error.message);
+                    }
+                };
+                reader.onerror = () => {
+                    showError('ファイルの読み込みに失敗しました。');
+                };
+                reader.readAsArrayBuffer(file);
+            } else {
+                showError('サポートされていないファイル形式です。CSV、TSV、またはExcelファイルをアップロードしてください。');
+            }
+        }
+
+        function parseCSV(text) {
+            Papa.parse(text, {
+                header: true,
+                dynamicTyping: true,
+                skipEmptyLines: true,
+                complete: (results) => {
+                    if (results.errors.length > 0) {
+                        showError('CSV解析エラー: ' + results.errors[0].message);
+                        return;
+                    }
+                    
+                    processData(results.data);
+                },
+                error: (error) => {
+                    showError('CSV解析エラー: ' + error.message);
+                }
+            });
+        }
+        
+        function processData(data) {
+            rawData = data;
+            
+            // 必須項目チェック
+            const requiredColumns = ['商品コード', '商品名称', '大分類名称', '中分類名称', 
+                                    '小分類名称', '細分類名称', 'メーカー名称', '地区名称', 
+                                    '金額', '数量', '平均価格', '金額PI値', '数量PI値'];
+            const dataColumns = Object.keys(rawData[0] || {});
+            const missingColumns = requiredColumns.filter(col => !dataColumns.includes(col));
+            
+            if (missingColumns.length > 0) {
+                showError('必須項目が不足しています: ' + missingColumns.join(', '));
+                return;
+            }
+            
+            // データクレンジング
+            rawData = rawData.filter(row => 
+                row['商品コード'] && row['商品名称'] && row['地区名称']
+            );
+            
+            if (rawData.length === 0) {
+                showError('有効なデータが見つかりませんでした。');
+                return;
+            }
+            
+            initializeFilters();
+            document.getElementById('filterSection').style.display = 'block';
+            const uploadArea = document.getElementById('uploadArea');
+            uploadArea.style.background = '#e8f5e9';
+            uploadArea.style.borderColor = '#4CAF50';
+            uploadArea.innerHTML = `
+                <h3 style="color: #4CAF50;">データ読み込み完了</h3>
+                <p>${rawData.length.toLocaleString()}件のデータを読み込みました</p>
+            `;
+        }
+
+        function initializeFilters() {
+            // エリア選択
+            const areas = [...new Set(rawData.map(d => d['地区名称']))].sort();
+            const areaSelect = document.getElementById('areaSelect');
+            areaSelect.innerHTML = '';
+            areas.forEach(area => {
+                const option = document.createElement('option');
+                option.value = area;
+                option.textContent = area;
+                areaSelect.appendChild(option);
+            });
+
+            // 大分類
+            const majorCategories = [...new Set(rawData.map(d => d['大分類名称']))].sort();
+            const majorSelect = document.getElementById('majorCategorySelect');
+            majorSelect.innerHTML = '';
+            majorCategories.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat;
+                option.textContent = cat;
+                majorSelect.appendChild(option);
+            });
+
+            // 中分類
+            const middleCategories = [...new Set(rawData.map(d => d['中分類名称']))].sort();
+            const middleSelect = document.getElementById('middleCategorySelect');
+            middleSelect.innerHTML = '';
+            middleCategories.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat;
+                option.textContent = cat;
+                middleSelect.appendChild(option);
+            });
+
+            // 小分類
+            const minorCategories = [...new Set(rawData.map(d => d['小分類名称']))].sort();
+            const minorSelect = document.getElementById('minorCategorySelect');
+            minorSelect.innerHTML = '';
+            minorCategories.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat;
+                option.textContent = cat;
+                minorSelect.appendChild(option);
+            });
+
+            // 細分類
+            const subCategories = [...new Set(rawData.map(d => d['細分類名称']))].sort();
+            const subSelect = document.getElementById('subCategorySelect');
+            subSelect.innerHTML = '';
+            subCategories.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat;
+                option.textContent = cat;
+                subSelect.appendChild(option);
+            });
+            
+            // 階層連動のイベントリスナーを設定
+            document.getElementById('majorCategorySelect').addEventListener('change', () => {
+                updateHierarchicalSlicers('major');
+            });
+            
+            document.getElementById('middleCategorySelect').addEventListener('change', () => {
+                updateHierarchicalSlicers('middle');
+            });
+            
+            document.getElementById('minorCategorySelect').addEventListener('change', () => {
+                updateHierarchicalSlicers('minor');
+            });
+        }
+        
+        // 階層連動でスライサーの選択肢を更新する関数
+        function updateHierarchicalSlicers(changedLevel) {
+            // 選択された値を取得
+            const selectedMajors = Array.from(document.getElementById('majorCategorySelect').selectedOptions).map(opt => opt.value);
+            const selectedMiddles = Array.from(document.getElementById('middleCategorySelect').selectedOptions).map(opt => opt.value);
+            const selectedMinors = Array.from(document.getElementById('minorCategorySelect').selectedOptions).map(opt => opt.value);
+            
+            // データをフィルタリング
+            let filteredForMiddle = rawData;
+            let filteredForMinor = rawData;
+            let filteredForSub = rawData;
+            
+            // 大分類が選択された場合、中分類以下を更新
+            if (changedLevel === 'major') {
+                if (selectedMajors.length > 0) {
+                    filteredForMiddle = rawData.filter(d => selectedMajors.includes(d['大分類名称']));
+                    
+                    // 中分類の選択肢を更新
+                    const middleCategories = [...new Set(filteredForMiddle.map(d => d['中分類名称']))].sort();
+                    const middleSelect = document.getElementById('middleCategorySelect');
+                    const currentMiddleSelected = Array.from(middleSelect.selectedOptions).map(opt => opt.value);
+                    middleSelect.innerHTML = '';
+                    middleCategories.forEach(cat => {
+                        const option = document.createElement('option');
+                        option.value = cat;
+                        option.textContent = cat;
+                        if (currentMiddleSelected.includes(cat)) {
+                            option.selected = true;
+                        }
+                        middleSelect.appendChild(option);
+                    });
+                    
+                    // 中分類の選択をクリア（存在しない選択肢は自動的に外れる）
+                    const validMiddles = Array.from(middleSelect.selectedOptions).map(opt => opt.value);
+                    
+                    // 小分類・細分類もリセット
+                    if (validMiddles.length > 0) {
+                        filteredForMinor = rawData.filter(d => 
+                            selectedMajors.includes(d['大分類名称']) && 
+                            validMiddles.includes(d['中分類名称'])
+                        );
+                    } else {
+                        filteredForMinor = filteredForMiddle;
+                    }
+                } else {
+                    // 大分類の選択が解除された場合、全てリセット
+                    const middleCategories = [...new Set(rawData.map(d => d['中分類名称']))].sort();
+                    const middleSelect = document.getElementById('middleCategorySelect');
+                    middleSelect.innerHTML = '';
+                    middleCategories.forEach(cat => {
+                        const option = document.createElement('option');
+                        option.value = cat;
+                        option.textContent = cat;
+                        middleSelect.appendChild(option);
+                    });
+                    filteredForMinor = rawData;
+                }
+                
+                // 小分類の選択肢を更新
+                const minorCategories = [...new Set(filteredForMinor.map(d => d['小分類名称']))].sort();
+                const minorSelect = document.getElementById('minorCategorySelect');
+                minorSelect.innerHTML = '';
+                minorCategories.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat;
+                    option.textContent = cat;
+                    minorSelect.appendChild(option);
+                });
+                
+                // 細分類の選択肢を更新
+                filteredForSub = filteredForMinor;
+                const subCategories = [...new Set(filteredForSub.map(d => d['細分類名称']))].sort();
+                const subSelect = document.getElementById('subCategorySelect');
+                subSelect.innerHTML = '';
+                subCategories.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat;
+                    option.textContent = cat;
+                    subSelect.appendChild(option);
+                });
+            }
+            
+            // 中分類が選択された場合、小分類以下を更新
+            else if (changedLevel === 'middle') {
+                if (selectedMiddles.length > 0) {
+                    if (selectedMajors.length > 0) {
+                        filteredForMinor = rawData.filter(d => 
+                            selectedMajors.includes(d['大分類名称']) && 
+                            selectedMiddles.includes(d['中分類名称'])
+                        );
+                    } else {
+                        filteredForMinor = rawData.filter(d => selectedMiddles.includes(d['中分類名称']));
+                    }
+                    
+                    // 小分類の選択肢を更新
+                    const minorCategories = [...new Set(filteredForMinor.map(d => d['小分類名称']))].sort();
+                    const minorSelect = document.getElementById('minorCategorySelect');
+                    const currentMinorSelected = Array.from(minorSelect.selectedOptions).map(opt => opt.value);
+                    minorSelect.innerHTML = '';
+                    minorCategories.forEach(cat => {
+                        const option = document.createElement('option');
+                        option.value = cat;
+                        option.textContent = cat;
+                        if (currentMinorSelected.includes(cat)) {
+                            option.selected = true;
+                        }
+                        minorSelect.appendChild(option);
+                    });
+                    
+                    // 小分類の有効な選択を取得
+                    const validMinors = Array.from(minorSelect.selectedOptions).map(opt => opt.value);
+                    
+                    // 細分類を更新
+                    if (validMinors.length > 0) {
+                        if (selectedMajors.length > 0) {
+                            filteredForSub = rawData.filter(d => 
+                                selectedMajors.includes(d['大分類名称']) && 
+                                selectedMiddles.includes(d['中分類名称']) &&
+                                validMinors.includes(d['小分類名称'])
+                            );
+                        } else {
+                            filteredForSub = rawData.filter(d => 
+                                selectedMiddles.includes(d['中分類名称']) &&
+                                validMinors.includes(d['小分類名称'])
+                            );
+                        }
+                    } else {
+                        filteredForSub = filteredForMinor;
+                    }
+                } else {
+                    // 中分類の選択が解除された場合
+                    if (selectedMajors.length > 0) {
+                        filteredForMinor = rawData.filter(d => selectedMajors.includes(d['大分類名称']));
+                    } else {
+                        filteredForMinor = rawData;
+                    }
+                    
+                    const minorCategories = [...new Set(filteredForMinor.map(d => d['小分類名称']))].sort();
+                    const minorSelect = document.getElementById('minorCategorySelect');
+                    minorSelect.innerHTML = '';
+                    minorCategories.forEach(cat => {
+                        const option = document.createElement('option');
+                        option.value = cat;
+                        option.textContent = cat;
+                        minorSelect.appendChild(option);
+                    });
+                    
+                    filteredForSub = filteredForMinor;
+                }
+                
+                // 細分類の選択肢を更新
+                const subCategories = [...new Set(filteredForSub.map(d => d['細分類名称']))].sort();
+                const subSelect = document.getElementById('subCategorySelect');
+                subSelect.innerHTML = '';
+                subCategories.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat;
+                    option.textContent = cat;
+                    subSelect.appendChild(option);
+                });
+            }
+            
+            // 小分類が選択された場合、細分類を更新
+            else if (changedLevel === 'minor') {
+                if (selectedMinors.length > 0) {
+                    if (selectedMajors.length > 0 && selectedMiddles.length > 0) {
+                        filteredForSub = rawData.filter(d => 
+                            selectedMajors.includes(d['大分類名称']) && 
+                            selectedMiddles.includes(d['中分類名称']) &&
+                            selectedMinors.includes(d['小分類名称'])
+                        );
+                    } else if (selectedMajors.length > 0) {
+                        filteredForSub = rawData.filter(d => 
+                            selectedMajors.includes(d['大分類名称']) && 
+                            selectedMinors.includes(d['小分類名称'])
+                        );
+                    } else if (selectedMiddles.length > 0) {
+                        filteredForSub = rawData.filter(d => 
+                            selectedMiddles.includes(d['中分類名称']) &&
+                            selectedMinors.includes(d['小分類名称'])
+                        );
+                    } else {
+                        filteredForSub = rawData.filter(d => selectedMinors.includes(d['小分類名称']));
+                    }
+                } else {
+                    // 小分類の選択が解除された場合
+                    if (selectedMajors.length > 0 && selectedMiddles.length > 0) {
+                        filteredForSub = rawData.filter(d => 
+                            selectedMajors.includes(d['大分類名称']) && 
+                            selectedMiddles.includes(d['中分類名称'])
+                        );
+                    } else if (selectedMajors.length > 0) {
+                        filteredForSub = rawData.filter(d => selectedMajors.includes(d['大分類名称']));
+                    } else if (selectedMiddles.length > 0) {
+                        filteredForSub = rawData.filter(d => selectedMiddles.includes(d['中分類名称']));
+                    } else {
+                        filteredForSub = rawData;
+                    }
+                }
+                
+                // 細分類の選択肢を更新
+                const subCategories = [...new Set(filteredForSub.map(d => d['細分類名称']))].sort();
+                const subSelect = document.getElementById('subCategorySelect');
+                const currentSubSelected = Array.from(subSelect.selectedOptions).map(opt => opt.value);
+                subSelect.innerHTML = '';
+                subCategories.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat;
+                    option.textContent = cat;
+                    if (currentSubSelected.includes(cat)) {
+                        option.selected = true;
+                    }
+                    subSelect.appendChild(option);
+                });
+            }
+        }
+
+        function executeAnalysis() {
+            // 選択されたエリアを取得（複数選択）
+            const areaSelect = document.getElementById('areaSelect');
+            const selectedAreas = Array.from(areaSelect.selectedOptions).map(opt => opt.value);
+            
+            if (selectedAreas.length === 0) {
+                showError('エリアを1つ以上選択してください。');
+                return;
+            }
+            
+            showError('');
+            
+            // フィルター条件取得（複数選択対応）
+            const filters = {
+                areas: selectedAreas,
+                majors: Array.from(document.getElementById('majorCategorySelect').selectedOptions).map(opt => opt.value),
+                middles: Array.from(document.getElementById('middleCategorySelect').selectedOptions).map(opt => opt.value),
+                minors: Array.from(document.getElementById('minorCategorySelect').selectedOptions).map(opt => opt.value),
+                subs: Array.from(document.getElementById('subCategorySelect').selectedOptions).map(opt => opt.value),
+                rpiBase: document.getElementById('rpiBaseSelect').value
+            };
+
+            // データフィルタリング（複数選択対応）
+            filteredData = rawData.filter(row => {
+                // エリアフィルター（複数選択のいずれかに一致）
+                if (!filters.areas.includes(row['地区名称'])) return false;
+                
+                // 分類フィルター（選択されていない場合は全て表示）
+                if (filters.majors.length > 0 && !filters.majors.includes(row['大分類名称'])) return false;
+                if (filters.middles.length > 0 && !filters.middles.includes(row['中分類名称'])) return false;
+                if (filters.minors.length > 0 && !filters.minors.includes(row['小分類名称'])) return false;
+                if (filters.subs.length > 0 && !filters.subs.includes(row['細分類名称'])) return false;
+                
+                return true;
+            });
+
+            if (filteredData.length === 0) {
+                showError('選択条件に該当するデータがありません。');
+                return;
+            }
+
+            // 分析処理
+            calculateMetrics(filters);
+            renderTable();
+            
+            document.getElementById('resultsSection').style.display = 'block';
+            document.getElementById('downloadBtn').style.display = 'inline-block';
+        }
+
+        function calculateMetrics(filters) {
+            // RPI母数の分類キーを決定
+            const rpiBaseMap = {
+                'major': '大分類名称',
+                'middle': '中分類名称',
+                'minor': '小分類名称',
+                'sub': '細分類名称'
+            };
+            const rpiBaseKey = rpiBaseMap[filters.rpiBase];
+
+            // 全国データの集計（商品ごと）
+            const nationalData = {};
+            const nationalCategoryTotals = {};
+            
+            rawData.forEach(row => {
+                const categoryKey = row[rpiBaseKey];
+                const productKey = row['商品コード'];
+                
+                if (!nationalData[productKey]) {
+                    nationalData[productKey] = { amount: 0, quantity: 0, receipts: 0 };
+                }
+                nationalData[productKey].amount += row['金額'] || 0;
+                nationalData[productKey].quantity += row['数量'] || 0;
+                nationalData[productKey].receipts += (row['金額'] * 1000) / (row['金額PI値'] || 1);
+                
+                if (!nationalCategoryTotals[categoryKey]) {
+                    nationalCategoryTotals[categoryKey] = 0;
+                }
+                nationalCategoryTotals[categoryKey] += row['金額'] || 0;
+            });
+
+            // 選択エリアのカテゴリ合計
+            const areaCategoryTotals = {};
+            filteredData.forEach(row => {
+                const categoryKey = row[rpiBaseKey];
+                if (!areaCategoryTotals[categoryKey]) {
+                    areaCategoryTotals[categoryKey] = 0;
+                }
+                areaCategoryTotals[categoryKey] += row['金額'] || 0;
+            });
+
+            // 各商品のRPIと数量PI値相対指数を計算
+            filteredData.forEach(row => {
+                const categoryKey = row[rpiBaseKey];
+                const productKey = row['商品コード'];
+                
+                // RPI計算
+                const areaProductAmount = row['金額'] || 0;
+                const areaCategoryTotal = areaCategoryTotals[categoryKey] || 1;
+                const nationalProductAmount = nationalData[productKey] ? nationalData[productKey].amount : 0;
+                const nationalCategoryTotal = nationalCategoryTotals[categoryKey] || 1;
+                
+                const areaRatio = areaProductAmount / areaCategoryTotal;
+                const nationalRatio = nationalProductAmount / nationalCategoryTotal;
+                row['RPI'] = nationalRatio > 0 ? areaRatio / nationalRatio : 0;
+                
+                // 数量PI値相対指数（商品ごとに全国平均を計算）
+                const quantityPI = row['数量PI値'] || 0;
+                const productNationalData = nationalData[productKey];
+                
+                if (productNationalData && productNationalData.receipts > 0) {
+                    // この商品の全国平均数量PI値を計算
+                    const productNationalAvgQuantityPI = (productNationalData.quantity / productNationalData.receipts) * 1000;
+                    row['数量PI値相対指数'] = productNationalAvgQuantityPI > 0 ? quantityPI / productNationalAvgQuantityPI : 0;
+                } else {
+                    row['数量PI値相対指数'] = 0;
+                }
+            });
+
+            // 数量PI値順位（各商品について全エリア中での順位を計算）
+            filteredData.forEach(row => {
+                const productKey = row['商品コード'];
+                const currentQuantityPI = row['数量PI値'] || 0;
+                
+                // 同じ商品コードの全エリアデータを取得
+                const productDataAllAreas = rawData.filter(r => r['商品コード'] === productKey);
+                
+                // 全エリアの数量PI値を取得してソート
+                const allAreaQuantityPIs = productDataAllAreas
+                    .map(r => r['数量PI値'] || 0)
+                    .sort((a, b) => b - a);
+                
+                // 重複を考慮した順位計算
+                const rank = allAreaQuantityPIs.filter(pi => pi > currentQuantityPI).length + 1;
+                const totalAreas = allAreaQuantityPIs.length;
+                
+                row['数量PI値順位'] = `${rank}位/${totalAreas}位`;
+            });
+
+            // 統計サマリー表示
+            displayStats(filters);
+        }
+
+        function displayStats(filters) {
+            document.getElementById('infoBox').innerHTML = `
+                <p><strong>選択エリア:</strong> ${filters.areas.join(', ')}</p>
+                <p><strong>商品分類:</strong> ${getFilterLabel(filters)}</p>
+                <p><strong>RPI母数:</strong> ${getRpiBaseLabel(filters.rpiBase)}</p>
+                <p><strong>対象商品数:</strong> ${filteredData.length.toLocaleString()}品</p>
+            `;
+        }
+
+        function getFilterLabel(filters) {
+            const parts = [];
+            if (filters.majors.length > 0) parts.push(`大分類:${filters.majors.join(', ')}`);
+            if (filters.middles.length > 0) parts.push(`中分類:${filters.middles.join(', ')}`);
+            if (filters.minors.length > 0) parts.push(`小分類:${filters.minors.join(', ')}`);
+            if (filters.subs.length > 0) parts.push(`細分類:${filters.subs.join(', ')}`);
+            return parts.length > 0 ? parts.join(' / ') : '全分類';
+        }
+
+        function getRpiBaseLabel(base) {
+            const labels = {
+                'major': '大分類粒度',
+                'middle': '中分類粒度',
+                'minor': '小分類粒度',
+                'sub': '細分類粒度'
+            };
+            return labels[base] || '';
+        }
+
+        function renderTable() {
+            const showAmount = document.getElementById('col_amount').checked;
+            const showQuantity = document.getElementById('col_quantity').checked;
+            const showAvgPrice = document.getElementById('col_avgPrice').checked;
+            const showAmountPI = document.getElementById('col_amountPI').checked;
+
+            // 列定義
+            const columns = [
+                { key: '地区名称', label: 'エリア', type: 'text' },
+                { key: '商品コード', label: '商品コード', type: 'text' },
+                { key: '商品名称', label: '商品名', type: 'text' },
+                { key: '大分類名称', label: '大分類', type: 'text' },
+                { key: '中分類名称', label: '中分類', type: 'text' },
+                { key: '小分類名称', label: '小分類', type: 'text' },
+                { key: '細分類名称', label: '細分類', type: 'text' },
+                { key: 'メーカー名称', label: 'メーカー', type: 'text' }
+            ];
+
+            if (showAmount) columns.push({ key: '金額', label: '金額', type: 'number', format: 'comma' });
+            if (showQuantity) columns.push({ key: '数量', label: '数量', type: 'number', format: 'comma' });
+            if (showAvgPrice) columns.push({ key: '平均価格', label: '平均価格', type: 'number', format: 'comma' });
+            if (showAmountPI) columns.push({ key: '金額PI値', label: '金額PI値', type: 'number', format: 'decimal1' });
+
+            columns.push(
+                { key: '数量PI値', label: '数量PI値', type: 'number', format: 'decimal1' },
+                { key: '数量PI値順位', label: '数量PI値順位', type: 'text', format: 'none' },
+                { key: '数量PI値相対指数', label: '数量PI値相対指数', type: 'number', format: 'decimal2' },
+                { key: 'RPI', label: 'RPI', type: 'number', format: 'decimal2' }
+            );
+
+            // ヘッダー作成
+            let headerHTML = '<tr>';
+            columns.forEach(col => {
+                const sortIcon = sortConfig.column === col.key 
+                    ? (sortConfig.direction === 'asc' ? '▲' : '▼')
+                    : '⇅';
+                headerHTML += `<th onclick="sortTable('${col.key}')">${col.label} <span class="sort-icon">${sortIcon}</span>`;
+                headerHTML += `<br><input type="text" class="filter-input" data-column="${col.key}" placeholder="絞り込み...">`;
+                headerHTML += `</th>`;
+            });
+            headerHTML += '</tr>';
+            document.getElementById('tableHeader').innerHTML = headerHTML;
+
+            // フィルター入力イベント
+            document.querySelectorAll('.filter-input').forEach(input => {
+                input.addEventListener('input', (e) => {
+                    filterValues[e.target.dataset.column] = e.target.value.toLowerCase();
+                    applyFilters();
+                });
+                input.addEventListener('click', (e) => e.stopPropagation());
+            });
+
+            // データ表示
+            applyFilters();
+        }
+
+        function applyFilters() {
+            displayData = filteredData.filter(row => {
+                for (const [column, value] of Object.entries(filterValues)) {
+                    if (value && !String(row[column]).toLowerCase().includes(value)) {
+                        return false;
+                    }
+                }
+                return true;
+            });
+
+            renderTableBody();
+        }
+
+        function renderTableBody() {
+            const showAmount = document.getElementById('col_amount').checked;
+            const showQuantity = document.getElementById('col_quantity').checked;
+            const showAvgPrice = document.getElementById('col_avgPrice').checked;
+            const showAmountPI = document.getElementById('col_amountPI').checked;
+
+            let bodyHTML = '';
+            
+            if (displayData.length === 0) {
+                bodyHTML = '<tr><td colspan="20" class="no-data">該当するデータがありません</td></tr>';
+            } else {
+                displayData.forEach(row => {
+                    bodyHTML += '<tr>';
+                    bodyHTML += `<td>${row['地区名称'] || ''}</td>`;
+                    bodyHTML += `<td>${row['商品コード'] || ''}</td>`;
+                    bodyHTML += `<td>${row['商品名称'] || ''}</td>`;
+                    bodyHTML += `<td>${row['大分類名称'] || ''}</td>`;
+                    bodyHTML += `<td>${row['中分類名称'] || ''}</td>`;
+                    bodyHTML += `<td>${row['小分類名称'] || ''}</td>`;
+                    bodyHTML += `<td>${row['細分類名称'] || ''}</td>`;
+                    bodyHTML += `<td>${row['メーカー名称'] || ''}</td>`;
+                    
+                    if (showAmount) bodyHTML += `<td class="number-cell">${formatNumber(row['金額'], 'comma')}</td>`;
+                    if (showQuantity) bodyHTML += `<td class="number-cell">${formatNumber(row['数量'], 'comma')}</td>`;
+                    if (showAvgPrice) bodyHTML += `<td class="number-cell">${formatNumber(row['平均価格'], 'comma')}</td>`;
+                    if (showAmountPI) bodyHTML += `<td class="number-cell">${formatNumber(row['金額PI値'], 'decimal1')}</td>`;
+                    
+                    bodyHTML += `<td class="number-cell">${formatNumber(row['数量PI値'], 'decimal1')}</td>`;
+                    bodyHTML += `<td class="number-cell">${row['数量PI値順位'] || ''}</td>`;
+                    
+                    const qtyIndex = row['数量PI値相対指数'] || 0;
+                    const qtyClass = qtyIndex >= 1.2 ? 'highlight-high' : '';
+                    bodyHTML += `<td class="number-cell ${qtyClass}">${formatNumber(qtyIndex, 'decimal2')}</td>`;
+                    
+                    const rpi = row['RPI'] || 0;
+                    const rpiClass = rpi >= 1.2 ? 'highlight-high' : (rpi < 0.8 ? 'highlight-low' : '');
+                    bodyHTML += `<td class="number-cell ${rpiClass}">${formatNumber(rpi, 'decimal2')}</td>`;
+                    
+                    bodyHTML += '</tr>';
+                });
+            }
+
+            document.getElementById('tableBody').innerHTML = bodyHTML;
+        }
+
+        function sortTable(column) {
+            if (sortConfig.column === column) {
+                sortConfig.direction = sortConfig.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortConfig.column = column;
+                sortConfig.direction = 'asc';
+            }
+
+            displayData.sort((a, b) => {
+                let aVal = a[column];
+                let bVal = b[column];
+
+                // 数量PI値順位の特別処理（文字列 "3位/7位" を数値として比較）
+                if (column === '数量PI値順位') {
+                    const aRank = parseInt(String(aVal).split('位')[0]) || 0;
+                    const bRank = parseInt(String(bVal).split('位')[0]) || 0;
+                    return sortConfig.direction === 'asc' ? aRank - bRank : bRank - aRank;
+                }
+
+                if (typeof aVal === 'number' && typeof bVal === 'number') {
+                    return sortConfig.direction === 'asc' ? aVal - bVal : bVal - aVal;
+                }
+
+                aVal = String(aVal).toLowerCase();
+                bVal = String(bVal).toLowerCase();
+                
+                if (sortConfig.direction === 'asc') {
+                    return aVal.localeCompare(bVal, 'ja');
+                } else {
+                    return bVal.localeCompare(aVal, 'ja');
+                }
+            });
+
+            // ヘッダーのソートアイコンだけ更新
+            updateSortIcons();
+            renderTableBody();
+        }
+        
+        function updateSortIcons() {
+            const showAmount = document.getElementById('col_amount').checked;
+            const showQuantity = document.getElementById('col_quantity').checked;
+            const showAvgPrice = document.getElementById('col_avgPrice').checked;
+            const showAmountPI = document.getElementById('col_amountPI').checked;
+
+            const columns = [
+                { key: '地区名称', label: 'エリア' },
+                { key: '商品コード', label: '商品コード' },
+                { key: '商品名称', label: '商品名' },
+                { key: '大分類名称', label: '大分類' },
+                { key: '中分類名称', label: '中分類' },
+                { key: '小分類名称', label: '小分類' },
+                { key: '細分類名称', label: '細分類' },
+                { key: 'メーカー名称', label: 'メーカー' }
+            ];
+
+            if (showAmount) columns.push({ key: '金額', label: '金額' });
+            if (showQuantity) columns.push({ key: '数量', label: '数量' });
+            if (showAvgPrice) columns.push({ key: '平均価格', label: '平均価格' });
+            if (showAmountPI) columns.push({ key: '金額PI値', label: '金額PI値' });
+
+            columns.push(
+                { key: '数量PI値', label: '数量PI値' },
+                { key: '数量PI値順位', label: '数量PI値順位' },
+                { key: '数量PI値相対指数', label: '数量PI値相対指数' },
+                { key: 'RPI', label: 'RPI' }
+            );
+
+            let headerHTML = '<tr>';
+            columns.forEach(col => {
+                const sortIcon = sortConfig.column === col.key 
+                    ? (sortConfig.direction === 'asc' ? '▲' : '▼')
+                    : '⇅';
+                headerHTML += `<th onclick="sortTable('${col.key}')">${col.label} <span class="sort-icon">${sortIcon}</span>`;
+                headerHTML += `<br><input type="text" class="filter-input" data-column="${col.key}" placeholder="絞り込み...">`;
+                headerHTML += `</th>`;
+            });
+            headerHTML += '</tr>';
+            document.getElementById('tableHeader').innerHTML = headerHTML;
+
+            // フィルター入力イベント再設定
+            document.querySelectorAll('.filter-input').forEach(input => {
+                input.addEventListener('input', (e) => {
+                    filterValues[e.target.dataset.column] = e.target.value.toLowerCase();
+                    applyFilters();
+                });
+                input.addEventListener('click', (e) => e.stopPropagation());
+            });
+        }
+
+        function formatNumber(value, format) {
+            if (value === null || value === undefined || value === '') return '';
+            
+            const num = Number(value);
+            if (isNaN(num)) return value;
+            
+            switch (format) {
+                case 'comma':
+                    return Math.round(num).toLocaleString();
+                case 'decimal1':
+                    return num.toFixed(1);
+                case 'decimal2':
+                    return num.toFixed(2);
+                default:
+                    return num.toString();
+            }
+        }
+
+        function downloadExcel() {
+            if (displayData.length === 0) {
+                alert('ダウンロードするデータがありません。');
+                return;
+            }
+
+            const showAmount = document.getElementById('col_amount').checked;
+            const showQuantity = document.getElementById('col_quantity').checked;
+            const showAvgPrice = document.getElementById('col_avgPrice').checked;
+            const showAmountPI = document.getElementById('col_amountPI').checked;
+
+            // エクスポート用データ作成
+            const exportData = displayData.map(row => {
+                const obj = {
+                    '商品コード': row['商品コード'],
+                    '商品名': row['商品名称'],
+                    '大分類': row['大分類名称'],
+                    '中分類': row['中分類名称'],
+                    '小分類': row['小分類名称'],
+                    '細分類': row['細分類名称'],
+                    'メーカー': row['メーカー名称'],
+                    'エリア': row['地区名称']
+                };
+
+                if (showAmount) obj['金額'] = row['金額'];
+                if (showQuantity) obj['数量'] = row['数量'];
+                if (showAvgPrice) obj['平均価格'] = row['平均価格'];
+                if (showAmountPI) obj['金額PI値'] = row['金額PI値'];
+
+                obj['数量PI値'] = row['数量PI値'];
+                obj['数量PI値順位'] = row['数量PI値順位'];
+                obj['数量PI値相対指数'] = row['数量PI値相対指数'];
+                obj['RPI'] = row['RPI'];
+
+                return obj;
+            });
+
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'エリア特化商品選定一覧');
+
+            // 複数エリア選択の場合はファイル名を調整
+            const areaSelect = document.getElementById('areaSelect');
+            const selectedAreas = Array.from(areaSelect.selectedOptions).map(opt => opt.value);
+            const areaText = selectedAreas.length === 1 ? selectedAreas[0] : `${selectedAreas.length}エリア`;
+            
+            const fileName = `エリア特化商品選定一覧_${areaText}_${new Date().toISOString().slice(0,10)}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+        }
+
+        function showError(message) {
+            const errorContainer = document.getElementById('errorContainer');
+            if (message) {
+                errorContainer.innerHTML = `<div class="error-message">${message}</div>`;
+            } else {
+                errorContainer.innerHTML = '';
+            }
+        }
+
+        // チェックボックス変更時のテーブル再描画
+        ['col_amount', 'col_quantity', 'col_avgPrice', 'col_amountPI'].forEach(id => {
+            document.getElementById(id).addEventListener('change', () => {
+                if (filteredData.length > 0) renderTable();
+            });
+        });
+    </script>
+</body>
+</html>
