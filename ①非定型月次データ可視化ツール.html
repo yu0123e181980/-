@@ -13,8 +13,11 @@
         
         body {
             font-family: "Hiragino Sans", "Yu Gothic", "Meiryo", "MS PGothic", sans-serif;
-            background: #f5f5f5;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
             padding: 20px;
+            min-height: 100vh;
+            position: relative;
+            padding-bottom: 150px;
         }
         
         .container {
@@ -22,14 +25,20 @@
             margin: 0 auto;
             background: white;
             padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            border: 3px solid #fff;
         }
         
         h1 {
-            color: #333;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 30px;
-            font-size: 24px;
+            font-size: 28px;
+            font-weight: bold;
+            text-align: center;
         }
         
         .modal-overlay {
@@ -104,12 +113,15 @@
         }
         
         .btn-primary {
-            background: #1F5F8B;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
-        
+
         .btn-primary:hover {
-            background: #164563;
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
         }
         
         .btn-secondary {
@@ -152,22 +164,26 @@
         
         .upload-area {
             border: 3px dashed #ccc;
-            border-radius: 8px;
+            border-radius: 20px;
             padding: 40px;
             text-align: center;
             margin-bottom: 30px;
             cursor: pointer;
             transition: all 0.3s;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
         }
-        
+
         .upload-area:hover {
-            border-color: #1F5F8B;
-            background: #f9f9f9;
+            border-color: #667eea;
+            background: linear-gradient(135deg, #f8f9ff 0%, #e0e7ff 100%);
+            transform: scale(1.02);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
         }
-        
+
         .upload-area.dragover {
-            border-color: #1F5F8B;
-            background: #e3f2fd;
+            border-color: #667eea;
+            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+            border-style: solid;
         }
         
         .filters {
@@ -176,8 +192,10 @@
             gap: 15px;
             margin-bottom: 30px;
             padding: 20px;
-            background: #f9f9f9;
-            border-radius: 8px;
+            background: linear-gradient(135deg, #f8f9ff 0%, #fef3ff 100%);
+            border-radius: 20px;
+            border: 2px solid #e0e7ff;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
         }
         
         .filter-group {
@@ -202,8 +220,10 @@
         .metrics-selector {
             margin-bottom: 20px;
             padding: 20px;
-            background: #f9f9f9;
-            border-radius: 8px;
+            background: linear-gradient(135deg, #f8f9ff 0%, #fef3ff 100%);
+            border-radius: 20px;
+            border: 2px solid #e0e7ff;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
         }
         
         .metrics-selector h3 {
@@ -259,24 +279,39 @@
         
         .drill-all-btn {
             padding: 8px 16px;
-            background: #4CAF50;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 20px;
             cursor: pointer;
             margin-bottom: 15px;
             font-weight: bold;
+            box-shadow: 0 4px 15px rgba(17, 153, 142, 0.4);
+            transition: all 0.3s;
+        }
+
+        .drill-all-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(17, 153, 142, 0.6);
         }
         
         .export-table-btn {
             padding: 8px 16px;
-            background: #FF9800;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 20px;
             cursor: pointer;
             font-size: 13px;
             margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(240, 147, 251, 0.4);
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .export-table-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(240, 147, 251, 0.6);
         }
         
         .table-container {
@@ -302,11 +337,12 @@
         }
         
         .chart-card {
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 8px;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+            border: 2px solid #e0e7ff;
+            border-radius: 20px;
             padding: 20px;
             margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
         }
         
         .chart-card h3 {
@@ -358,17 +394,21 @@
         
         .download-chart-button {
             padding: 8px 16px;
-            background: #4CAF50;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 20px;
             cursor: pointer;
             font-size: 13px;
             margin-left: auto;
+            box-shadow: 0 4px 15px rgba(17, 153, 142, 0.4);
+            transition: all 0.3s;
+            font-weight: bold;
         }
-        
+
         .download-chart-button:hover {
-            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(17, 153, 142, 0.6);
         }
         
         .chart-wrapper {
@@ -384,18 +424,25 @@
         
         .mode-btn {
             padding: 10px 20px;
-            border: 2px solid #1F5F8B;
+            border: 2px solid #667eea;
             background: white;
-            color: #1F5F8B;
-            border-radius: 4px;
+            color: #667eea;
+            border-radius: 20px;
             cursor: pointer;
             font-weight: bold;
             transition: all 0.3s;
         }
-        
+
         .mode-btn.active {
-            background: #1F5F8B;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .mode-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
         
         table {
@@ -413,7 +460,7 @@
         }
         
         th {
-            background: #2B5797;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             font-weight: bold;
             color: white;
             position: relative;
@@ -722,6 +769,88 @@
             padding: 12px;
             background: #f9f9f9;
             border-radius: 4px;
+        }
+
+        /* Animal animation footer */
+        .animal-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 120px;
+            background: linear-gradient(to top, rgba(102, 126, 234, 0.3) 0%, transparent 100%);
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 1000;
+        }
+
+        .animal {
+            position: absolute;
+            bottom: 10px;
+            font-size: 40px;
+            animation: walk 15s linear infinite;
+            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+        }
+
+        .animal:nth-child(1) {
+            animation-delay: 0s;
+            animation-duration: 20s;
+            bottom: 15px;
+        }
+
+        .animal:nth-child(2) {
+            animation-delay: 5s;
+            animation-duration: 18s;
+            bottom: 25px;
+        }
+
+        .animal:nth-child(3) {
+            animation-delay: 10s;
+            animation-duration: 22s;
+            bottom: 10px;
+        }
+
+        .animal:nth-child(4) {
+            animation-delay: 3s;
+            animation-duration: 19s;
+            bottom: 20px;
+        }
+
+        .animal:nth-child(5) {
+            animation-delay: 8s;
+            animation-duration: 21s;
+            bottom: 12px;
+        }
+
+        .animal:nth-child(6) {
+            animation-delay: 13s;
+            animation-duration: 17s;
+            bottom: 18px;
+        }
+
+        @keyframes walk {
+            0% {
+                left: -100px;
+                transform: scaleX(1);
+            }
+            100% {
+                left: 100%;
+                transform: scaleX(1);
+            }
+        }
+
+        /* Make animals bounce slightly as they walk */
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0) scaleX(1);
+            }
+            50% {
+                transform: translateY(-5px) scaleX(1);
+            }
+        }
+
+        .animal.bounce {
+            animation: walk 15s linear infinite, bounce 0.5s ease-in-out infinite;
         }
     </style>
 </head>
@@ -2645,5 +2774,15 @@
             }
         }
     </script>
+
+    <!-- Walking Animals Footer -->
+    <div class="animal-footer">
+        <div class="animal bounce">🐕</div>
+        <div class="animal bounce">🐈</div>
+        <div class="animal bounce">🐇</div>
+        <div class="animal bounce">🦊</div>
+        <div class="animal bounce">🐿️</div>
+        <div class="animal bounce">🦔</div>
+    </div>
 </body>
 </html>
