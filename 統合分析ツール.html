@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>統合分析ツール</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Hiragino Sans", "Yu Gothic", "Meiryo", "MS PGothic", sans-serif;
+            background: #f5f5f5;
+        }
+
+        /* タブナビゲーション */
+        .tab-nav {
+            background: linear-gradient(135deg, #1F5F8B 0%, #2C7FB8 100%);
+            padding: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .tab-nav-inner {
+            max-width: 1800px;
+            margin: 0 auto;
+            display: flex;
+            overflow-x: auto;
+        }
+
+        .tab-button {
+            flex: 1;
+            min-width: 150px;
+            padding: 18px 24px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .tab-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .tab-button.active {
+            background: white;
+            color: #1F5F8B;
+            border-bottom: 3px solid #FF9800;
+        }
+
+        .tab-button:last-child {
+            border-right: none;
+        }
+
+        /* タブコンテンツ */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* ツールコンテナ iframe */
+        .tool-frame {
+            width: 100%;
+            height: calc(100vh - 60px);
+            border: none;
+        }
+
+        /* ローディング画面 */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1F5F8B 0%, #2C7FB8 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            animation: fadeOut 0.5s ease-out 2s forwards;
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+
+        .loading-title {
+            color: white;
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 40px;
+            opacity: 0;
+            animation: fadeIn 0.6s ease-out 0.2s forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        .loading-subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 18px;
+            margin-bottom: 40px;
+            opacity: 0;
+            animation: fadeIn 0.6s ease-out 0.4s forwards;
+        }
+
+        .chart-animation {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 8px;
+            height: 120px;
+            margin-bottom: 30px;
+        }
+
+        .bar {
+            width: 20px;
+            background: white;
+            border-radius: 3px 3px 0 0;
+            opacity: 0.9;
+            animation: growBar 0.8s ease-out forwards;
+        }
+
+        .bar:nth-child(1) { height: 60px; animation-delay: 0.3s; }
+        .bar:nth-child(2) { height: 90px; animation-delay: 0.4s; }
+        .bar:nth-child(3) { height: 45px; animation-delay: 0.5s; }
+        .bar:nth-child(4) { height: 75px; animation-delay: 0.6s; }
+        .bar:nth-child(5) { height: 100px; animation-delay: 0.7s; }
+        .bar:nth-child(6) { height: 55px; animation-delay: 0.8s; }
+        .bar:nth-child(7) { height: 80px; animation-delay: 0.9s; }
+        .bar:nth-child(8) { height: 65px; animation-delay: 1.0s; }
+
+        @keyframes growBar {
+            from {
+                transform: scaleY(0);
+                opacity: 0;
+            }
+            to {
+                transform: scaleY(1);
+                opacity: 0.9;
+            }
+        }
+
+        .loading-text {
+            color: white;
+            font-size: 14px;
+            opacity: 0;
+            animation: fadeIn 0.5s ease-out 1.5s forwards;
+        }
+    </style>
+</head>
+<body>
+    <!-- ローディング画面 -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-title">統合分析ツール</div>
+        <div class="loading-subtitle">8つの分析ツールを1つに統合</div>
+        <div class="chart-animation">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+        </div>
+        <div class="loading-text">Loading...</div>
+    </div>
+
+    <!-- タブナビゲーション -->
+    <div class="tab-nav">
+        <div class="tab-nav-inner">
+            <button class="tab-button active" onclick="switchTab(0)">⓪ 棚割データ処理</button>
+            <button class="tab-button" onclick="switchTab(1)">① 月次データ可視化</button>
+            <button class="tab-button" onclick="switchTab(2)">② 売上分解(ツリー)</button>
+            <button class="tab-button" onclick="switchTab(3)">② 売上分解(表形式)</button>
+            <button class="tab-button" onclick="switchTab(4)">③ 顧客属性分析</button>
+            <button class="tab-button" onclick="switchTab(5)">④ ビジュアルベンチマーク</button>
+            <button class="tab-button" onclick="switchTab(6)">⑤ エリア特化商品</button>
+            <button class="tab-button" onclick="switchTab(7)">⑥ ABC分析</button>
+        </div>
+    </div>
+
+    <!-- タブコンテンツ -->
+    <div id="tabContent0" class="tab-content active">
+        <iframe class="tool-frame" src="⓪棚割データ処理ツール.html"></iframe>
+    </div>
+    <div id="tabContent1" class="tab-content">
+        <iframe class="tool-frame" src="①非定型月次データ可視化ツール.html"></iframe>
+    </div>
+    <div id="tabContent2" class="tab-content">
+        <iframe class="tool-frame" src="②売上分解ツール 分解ツリーver.html"></iframe>
+    </div>
+    <div id="tabContent3" class="tab-content">
+        <iframe class="tool-frame" src="②売上分解ツール 表形式ver.html"></iframe>
+    </div>
+    <div id="tabContent4" class="tab-content">
+        <iframe class="tool-frame" src="③顧客属性詳細分析ツール.html"></iframe>
+    </div>
+    <div id="tabContent5" class="tab-content">
+        <iframe class="tool-frame" src="④Visual_Benchmarking_tool.html"></iframe>
+    </div>
+    <div id="tabContent6" class="tab-content">
+        <iframe class="tool-frame" src="⑤エリア特化商品選定ツール.html"></iframe>
+    </div>
+    <div id="tabContent7" class="tab-content">
+        <iframe class="tool-frame" src="⑥ABC分析ツール.html"></iframe>
+    </div>
+
+    <script>
+        // ローディング画面を非表示にする
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loadingOverlay').style.display = 'none';
+            }, 2500);
+        });
+
+        // タブ切り替え関数
+        function switchTab(index) {
+            // すべてのタブボタンとコンテンツから active クラスを削除
+            const buttons = document.querySelectorAll('.tab-button');
+            const contents = document.querySelectorAll('.tab-content');
+
+            buttons.forEach(btn => btn.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+
+            // 選択されたタブボタンとコンテンツに active クラスを追加
+            buttons[index].classList.add('active');
+            document.getElementById(`tabContent${index}`).classList.add('active');
+
+            // ページトップにスクロール（オプション）
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
