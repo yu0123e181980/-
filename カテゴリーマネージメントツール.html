@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>カテゴリーマネージメントツール統合システム</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Hiragino Sans", "Yu Gothic", "Meiryo", "MS PGothic", sans-serif;
+            background: #f5f5f5;
+            overflow-x: hidden;
+        }
+
+        /* スプラッシュスクリーン */
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1F5F8B 0%, #2C7FB8 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 30000;
+            animation: fadeOut 0.5s ease-out 2s forwards;
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+
+        .splash-content {
+            text-align: center;
+        }
+
+        .splash-title {
+            color: white;
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out 0.2s forwards;
+        }
+
+        .splash-subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 18px;
+            margin-bottom: 40px;
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out 0.4s forwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chart-animation {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 8px;
+            height: 120px;
+            margin-bottom: 30px;
+        }
+
+        .bar {
+            width: 20px;
+            background: white;
+            border-radius: 3px 3px 0 0;
+            opacity: 0.9;
+            animation: growBar 0.8s ease-out forwards;
+        }
+
+        .bar:nth-child(1) { height: 60px; animation-delay: 0.5s; }
+        .bar:nth-child(2) { height: 90px; animation-delay: 0.6s; }
+        .bar:nth-child(3) { height: 45px; animation-delay: 0.7s; }
+        .bar:nth-child(4) { height: 75px; animation-delay: 0.8s; }
+        .bar:nth-child(5) { height: 100px; animation-delay: 0.9s; }
+        .bar:nth-child(6) { height: 55px; animation-delay: 1.0s; }
+        .bar:nth-child(7) { height: 80px; animation-delay: 1.1s; }
+        .bar:nth-child(8) { height: 70px; animation-delay: 1.2s; }
+
+        @keyframes growBar {
+            from {
+                transform: scaleY(0);
+                opacity: 0;
+            }
+            to {
+                transform: scaleY(1);
+                opacity: 0.9;
+            }
+        }
+
+        .loading-text {
+            color: white;
+            font-size: 14px;
+            opacity: 0;
+            animation: fadeIn 0.5s ease-out 1.5s forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 0.8;
+            }
+        }
+
+        /* モーダル */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 20000;
+        }
+
+        .modal {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 700px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .modal h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+
+        .modal-content {
+            margin-bottom: 25px;
+            line-height: 1.8;
+            color: #555;
+        }
+
+        .library-list {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+            border-left: 4px solid #1F5F8B;
+        }
+
+        .library-list li {
+            margin: 8px 0;
+            color: #333;
+        }
+
+        .security-info {
+            background: #e8f5e9;
+            padding: 12px;
+            border-radius: 4px;
+            margin: 15px 0;
+            border-left: 4px solid #4CAF50;
+            font-size: 14px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #1F5F8B;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #164563;
+        }
+
+        .btn-secondary {
+            background: #ddd;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #ccc;
+        }
+
+        .loading-message {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #1F5F8B;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #ffebee;
+            padding: 20px;
+            border-radius: 4px;
+            border-left: 4px solid #f44336;
+            color: #c62828;
+            margin: 20px;
+        }
+
+        /* ヘッダー */
+        .header {
+            background: linear-gradient(135deg, #1F5F8B 0%, #2C7FB8 100%);
+            color: white;
+            padding: 20px 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* タブナビゲーション */
+        .tab-navigation {
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .tab-list {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .tab-item {
+            flex: 0 0 auto;
+            min-width: 180px;
+        }
+
+        .tab-button {
+            width: 100%;
+            padding: 15px 20px;
+            border: none;
+            background: transparent;
+            color: #555;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            position: relative;
+        }
+
+        .tab-button:hover {
+            background: #f9f9f9;
+            color: #1F5F8B;
+        }
+
+        .tab-button.active {
+            color: #1F5F8B;
+            border-bottom-color: #1F5F8B;
+            background: #f0f7fc;
+        }
+
+        .tab-number {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            line-height: 24px;
+            text-align: center;
+            background: #ddd;
+            color: white;
+            border-radius: 50%;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+
+        .tab-button.active .tab-number {
+            background: #1F5F8B;
+        }
+
+        /* コンテンツエリア */
+        .content-area {
+            padding: 20px;
+        }
+
+        .tool-section {
+            display: none;
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .tool-section.active {
+            display: block;
+        }
+
+        .tool-header {
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #1F5F8B;
+        }
+
+        .tool-header h2 {
+            color: #1F5F8B;
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+        .tool-header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* 共通スタイル */
+        .upload-area {
+            border: 3px dashed #ccc;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-area:hover {
+            border-color: #1F5F8B;
+            background: #f9f9f9;
+        }
+
+        .upload-area.dragover {
+            border-color: #1F5F8B;
+            background: #e3f2fd;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background: #2B5797;
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <!-- スプラッシュスクリーン -->
+    <div id="splashScreen" class="splash-screen">
+        <div class="splash-content">
+            <div class="splash-title">カテゴリーマネージメントツール</div>
+            <div class="splash-subtitle">統合分析システム</div>
+            <div class="chart-animation">
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+            </div>
+            <div class="loading-text">Loading...</div>
+        </div>
+    </div>
+
+    <!-- 外部ライブラリ読み込み確認モーダル -->
+    <div id="confirmModal" class="modal-overlay hidden">
+        <div class="modal">
+            <h2>外部ライブラリの読み込み確認</h2>
+            <div class="modal-content">
+                <p>このツールを使用するには、以下のJavaScriptライブラリを外部から読み込む必要があります:</p>
+
+                <div class="library-list">
+                    <ul>
+                        <li><strong>XLSX.js (v0.18.5)</strong> - Excelファイル処理用</li>
+                        <li><strong>Chart.js (v3.9.1)</strong> - グラフ描画用</li>
+                        <li><strong>html2canvas (v1.4.1)</strong> - 画像出力用</li>
+                        <li><strong>PapaParse (v5.3.2)</strong> - CSVファイル処理用</li>
+                        <li><strong>JSZip (v3.10.1)</strong> - Zip圧縮用</li>
+                        <li><strong>FileSaver.js (v2.0.5)</strong> - ファイル保存用</li>
+                    </ul>
+                </div>
+
+                <div class="security-info">
+                    <strong>接続情報:</strong><br>
+                    ・接続先: https://cdnjs.cloudflare.com (Cloudflare公式CDN)<br>
+                    ・アップロードしたデータは外部に送信されません<br>
+                    ・すべての処理はブラウザ内で完結します
+                </div>
+
+                <p style="color: #666; font-size: 13px; margin-top: 15px;">
+                    ※ライブラリは起動時に1回のみ読み込まれ、ブラウザ内でのみ動作します。<br>
+                    ※本ツール内で利用されるCDN(Content Delivery Network)経由で提供される外部ライブラリについては、その安全性、可用性、正確性、およびツールの機能に与える影響を含め、一切の責任を負いません。
+                </p>
+            </div>
+
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" id="cancelBtn">キャンセル</button>
+                <button class="btn btn-primary" id="approveBtn">記載事項に同意してライブラリを読み込む</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ライブラリ読み込み中メッセージ -->
+    <div id="loadingMessage" class="loading-message hidden">
+        <div class="loading-spinner"></div>
+        <p>ライブラリを読み込んでいます...</p>
+    </div>
+
+    <!-- エラーメッセージ -->
+    <div id="errorMessage" class="error-message hidden"></div>
+
+    <!-- メインアプリケーション -->
+    <div id="mainApp" class="hidden">
+        <!-- ヘッダー -->
+        <header class="header">
+            <h1>カテゴリーマネージメントツール統合システム</h1>
+            <p>8つのツールを統合した分析プラットフォーム</p>
+        </header>
+
+        <!-- タブナビゲーション -->
+        <nav class="tab-navigation">
+            <ul class="tab-list">
+                <li class="tab-item">
+                    <button class="tab-button active" data-tool="tool0">
+                        <span class="tab-number">0</span>棚割データ処理
+                    </button>
+                </li>
+                <li class="tab-item">
+                    <button class="tab-button" data-tool="tool1">
+                        <span class="tab-number">1</span>非定型月次データ可視化
+                    </button>
+                </li>
+                <li class="tab-item">
+                    <button class="tab-button" data-tool="tool2a">
+                        <span class="tab-number">2A</span>売上分解(ツリー)
+                    </button>
+                </li>
+                <li class="tab-item">
+                    <button class="tab-button" data-tool="tool2b">
+                        <span class="tab-number">2B</span>売上分解(表形式)
+                    </button>
+                </li>
+                <li class="tab-item">
+                    <button class="tab-button" data-tool="tool3">
+                        <span class="tab-number">3</span>顧客属性詳細分析
+                    </button>
+                </li>
+                <li class="tab-item">
+                    <button class="tab-button" data-tool="tool4">
+                        <span class="tab-number">4</span>Visual Benchmarking
+                    </button>
+                </li>
+                <li class="tab-item">
+                    <button class="tab-button" data-tool="tool5">
+                        <span class="tab-number">5</span>エリア特化商品選定
+                    </button>
+                </li>
+                <li class="tab-item">
+                    <button class="tab-button" data-tool="tool6">
+                        <span class="tab-number">6</span>ABC分析
+                    </button>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- コンテンツエリア -->
+        <div class="content-area">
+            <!-- Tool 0: 棚割データ処理ツール -->
+            <div id="tool0" class="tool-section active">
+                <div class="tool-header">
+                    <h2>⓪ 棚割データ処理ツール</h2>
+                    <p>Excelファイルから棚割データを処理し、最適化されたフォーマットで出力します</p>
+                </div>
+                <div class="upload-area" data-tool="0">
+                    <p>Excelファイルをドラッグ&ドロップ または クリックして選択</p>
+                    <input type="file" accept=".xlsx,.xls" style="display:none;">
+                </div>
+                <div id="tool0Content"></div>
+            </div>
+
+            <!-- Tool 1: 非定型月次データ可視化ツール -->
+            <div id="tool1" class="tool-section">
+                <div class="tool-header">
+                    <h2>① 非定型月次データ可視化ツール</h2>
+                    <p>月次データを様々な形式で可視化し、トレンド分析を行います</p>
+                </div>
+                <div class="upload-area" data-tool="1">
+                    <p>Excelファイルをドラッグ&ドロップ または クリックして選択</p>
+                    <input type="file" accept=".xlsx,.xls" style="display:none;">
+                </div>
+                <div id="tool1Content"></div>
+            </div>
+
+            <!-- Tool 2A: 売上分解ツール(ツリー) -->
+            <div id="tool2a" class="tool-section">
+                <div class="tool-header">
+                    <h2>② 売上分解ツール(分解ツリーver)</h2>
+                    <p>売上をツリー構造で分解し、階層的に分析します</p>
+                </div>
+                <div class="upload-area" data-tool="2a">
+                    <p>Excelファイルをドラッグ&ドロップ または クリックして選択</p>
+                    <input type="file" accept=".xlsx,.xls" style="display:none;">
+                </div>
+                <div id="tool2aContent"></div>
+            </div>
+
+            <!-- Tool 2B: 売上分解ツール(表形式) -->
+            <div id="tool2b" class="tool-section">
+                <div class="tool-header">
+                    <h2>② 売上分解ツール(表形式ver)</h2>
+                    <p>売上を表形式で分解し、詳細に分析します</p>
+                </div>
+                <div class="upload-area" data-tool="2b">
+                    <p>Excelファイルをドラッグ&ドロップ または クリックして選択</p>
+                    <input type="file" accept=".xlsx,.xls" style="display:none;">
+                </div>
+                <div id="tool2bContent"></div>
+            </div>
+
+            <!-- Tool 3: 顧客属性詳細分析ツール -->
+            <div id="tool3" class="tool-section">
+                <div class="tool-header">
+                    <h2>③ 顧客属性詳細分析ツール</h2>
+                    <p>顧客属性を詳細に分析し、セグメント別の特性を明らかにします</p>
+                </div>
+                <div class="upload-area" data-tool="3">
+                    <p>Excelファイルをドラッグ&ドロップ または クリックして選択</p>
+                    <input type="file" accept=".xlsx,.xls" style="display:none;">
+                </div>
+                <div id="tool3Content"></div>
+            </div>
+
+            <!-- Tool 4: Visual Benchmarking Tool -->
+            <div id="tool4" class="tool-section">
+                <div class="tool-header">
+                    <h2>④ Visual Benchmarking Tool</h2>
+                    <p>ベンチマーキングデータを視覚的に比較分析します</p>
+                </div>
+                <div class="upload-area" data-tool="4">
+                    <p>Excelファイルをドラッグ&ドロップ または クリックして選択</p>
+                    <input type="file" accept=".xlsx,.xls" style="display:none;">
+                </div>
+                <div id="tool4Content"></div>
+            </div>
+
+            <!-- Tool 5: エリア特化商品選定ツール -->
+            <div id="tool5" class="tool-section">
+                <div class="tool-header">
+                    <h2>⑤ エリア特化商品選定ツール</h2>
+                    <p>エリアごとの特性に合わせた商品選定を支援します</p>
+                </div>
+                <div class="upload-area" data-tool="5">
+                    <p>Excelファイルをドラッグ&ドロップ または クリックして選択</p>
+                    <input type="file" accept=".xlsx,.xls" style="display:none;">
+                </div>
+                <div id="tool5Content"></div>
+            </div>
+
+            <!-- Tool 6: ABC分析ツール -->
+            <div id="tool6" class="tool-section">
+                <div class="tool-header">
+                    <h2>⑥ ABC分析ツール</h2>
+                    <p>商品をABC分類し、重点管理対象を明確にします</p>
+                </div>
+                <div class="upload-area" data-tool="6">
+                    <p>Excelファイルをドラッグ&ドロップ または クリックして選択</p>
+                    <input type="file" accept=".xlsx,.xls" style="display:none;">
+                </div>
+                <div id="tool6Content"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // グローバル変数
+        let librariesLoaded = false;
+
+        // 外部ライブラリの定義
+        const libraries = [
+            {
+                name: 'XLSX',
+                url: 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
+                check: () => typeof XLSX !== 'undefined'
+            },
+            {
+                name: 'Chart',
+                url: 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js',
+                check: () => typeof Chart !== 'undefined'
+            },
+            {
+                name: 'html2canvas',
+                url: 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',
+                check: () => typeof html2canvas !== 'undefined'
+            },
+            {
+                name: 'Papa',
+                url: 'https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js',
+                check: () => typeof Papa !== 'undefined'
+            },
+            {
+                name: 'JSZip',
+                url: 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',
+                check: () => typeof JSZip !== 'undefined'
+            },
+            {
+                name: 'saveAs',
+                url: 'https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js',
+                check: () => typeof saveAs !== 'undefined'
+            }
+        ];
+
+        // 起動時の処理
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('splashScreen').style.display = 'none';
+                document.getElementById('confirmModal').classList.remove('hidden');
+            }, 2500);
+        });
+
+        // 承認ボタン
+        document.getElementById('approveBtn').addEventListener('click', loadLibraries);
+
+        // キャンセルボタン
+        document.getElementById('cancelBtn').addEventListener('click', handleCancel);
+
+        // ライブラリ読み込み関数
+        function loadLibraries() {
+            document.getElementById('confirmModal').classList.add('hidden');
+            document.getElementById('loadingMessage').classList.remove('hidden');
+
+            const promises = libraries.map(lib => loadScript(lib));
+
+            Promise.all(promises)
+                .then(() => {
+                    librariesLoaded = true;
+                    document.getElementById('loadingMessage').classList.add('hidden');
+                    document.getElementById('mainApp').classList.remove('hidden');
+                    initializeApp();
+                })
+                .catch(error => {
+                    document.getElementById('loadingMessage').classList.add('hidden');
+                    const errorMsg = document.getElementById('errorMessage');
+                    errorMsg.textContent = `ライブラリの読み込みに失敗しました: ${error.message}`;
+                    errorMsg.classList.remove('hidden');
+                });
+        }
+
+        // スクリプト読み込み関数
+        function loadScript(lib) {
+            return new Promise((resolve, reject) => {
+                if (lib.check()) {
+                    resolve();
+                    return;
+                }
+
+                const script = document.createElement('script');
+                script.src = lib.url;
+
+                script.onload = () => {
+                    if (lib.check()) {
+                        console.log(`${lib.name} loaded successfully`);
+                        resolve();
+                    } else {
+                        reject(new Error(`${lib.name} failed to initialize`));
+                    }
+                };
+
+                script.onerror = () => {
+                    reject(new Error(`${lib.name} failed to load from CDN`));
+                };
+
+                document.head.appendChild(script);
+            });
+        }
+
+        // キャンセル処理
+        function handleCancel() {
+            document.getElementById('confirmModal').classList.add('hidden');
+            const errorMsg = document.getElementById('errorMessage');
+            errorMsg.innerHTML = `
+                <strong>ライブラリの読み込みがキャンセルされました</strong><br>
+                このツールを使用するには、外部ライブラリの読み込みを承認する必要があります。<br>
+                ページを再読み込みして、再度お試しください。
+            `;
+            errorMsg.classList.remove('hidden');
+        }
+
+        // アプリ初期化
+        function initializeApp() {
+            // タブ切り替え
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    const toolId = button.dataset.tool;
+                    switchTool(toolId);
+                });
+            });
+
+            // ファイルアップロードエリアの初期化
+            document.querySelectorAll('.upload-area').forEach(area => {
+                const fileInput = area.querySelector('input[type="file"]');
+                const toolId = area.dataset.tool;
+
+                area.addEventListener('click', () => fileInput.click());
+                area.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    area.classList.add('dragover');
+                });
+                area.addEventListener('dragleave', () => area.classList.remove('dragover'));
+                area.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    area.classList.remove('dragover');
+                    handleFileUpload(e.dataTransfer.files[0], toolId);
+                });
+                fileInput.addEventListener('change', (e) => handleFileUpload(e.target.files[0], toolId));
+            });
+
+            console.log('アプリケーションを初期化しました');
+        }
+
+        // ツール切り替え
+        function switchTool(toolId) {
+            // すべてのタブボタンから active クラスを削除
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // クリックされたタブボタンに active クラスを追加
+            document.querySelector(`[data-tool="${toolId}"]`).classList.add('active');
+
+            // すべてのツールセクションを非表示
+            document.querySelectorAll('.tool-section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // 選択されたツールセクションを表示
+            document.getElementById(toolId).classList.add('active');
+        }
+
+        // ファイルアップロード処理
+        function handleFileUpload(file, toolId) {
+            if (!file) return;
+
+            console.log(`Tool ${toolId}: File uploaded - ${file.name}`);
+
+            // 各ツールごとのファイル処理を実装予定
+            // この部分は後続の実装で各ツールの機能を追加します
+        }
+    </script>
+</body>
+</html>
