@@ -587,10 +587,21 @@
     <script>
         // スプラッシュスクリーン制御
         window.addEventListener('load', () => {
-            setTimeout(() => {
+            // localStorageでライブラリ承認状態をチェック
+            const librariesApproved = localStorage.getItem('cmToolLibrariesApproved') === 'true';
+
+            if (librariesApproved) {
+                // 既に承認済みの場合、スプラッシュとモーダルをスキップ
                 document.getElementById('splashScreen').style.display = 'none';
-                document.getElementById('confirmModal').classList.remove('hidden');
-            }, 2500);
+                // ライブラリは既にブラウザキャッシュにあるので、直接読み込み
+                loadLibraries();
+            } else {
+                // 未承認の場合、通常のフロー
+                setTimeout(() => {
+                    document.getElementById('splashScreen').style.display = 'none';
+                    document.getElementById('confirmModal').classList.remove('hidden');
+                }, 2500);
+            }
         });
         
         // ライブラリ定義

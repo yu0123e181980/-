@@ -487,42 +487,42 @@
         <nav class="tab-navigation">
             <ul class="tab-list">
                 <li class="tab-item">
-                    <button class="tab-button active" data-tool="tool0">
+                    <button class="tab-button active" data-tool="⓪棚割データ処理ツール.html">
                         <span class="tab-number">0</span>棚割データ処理
                     </button>
                 </li>
                 <li class="tab-item">
-                    <button class="tab-button" data-tool="tool1">
+                    <button class="tab-button" data-tool="①非定型月次データ可視化ツール.html">
                         <span class="tab-number">1</span>非定型月次データ可視化
                     </button>
                 </li>
                 <li class="tab-item">
-                    <button class="tab-button" data-tool="tool2a">
+                    <button class="tab-button" data-tool="②売上分解ツール 分解ツリーver.html">
                         <span class="tab-number">2A</span>売上分解(ツリー)
                     </button>
                 </li>
                 <li class="tab-item">
-                    <button class="tab-button" data-tool="tool2b">
+                    <button class="tab-button" data-tool="②売上分解ツール 表形式ver.html">
                         <span class="tab-number">2B</span>売上分解(表形式)
                     </button>
                 </li>
                 <li class="tab-item">
-                    <button class="tab-button" data-tool="tool3">
+                    <button class="tab-button" data-tool="③顧客属性詳細分析ツール.html">
                         <span class="tab-number">3</span>顧客属性詳細分析
                     </button>
                 </li>
                 <li class="tab-item">
-                    <button class="tab-button" data-tool="tool4">
+                    <button class="tab-button" data-tool="④Visual_Benchmarking_tool.html">
                         <span class="tab-number">4</span>Visual Benchmarking
                     </button>
                 </li>
                 <li class="tab-item">
-                    <button class="tab-button" data-tool="tool5">
+                    <button class="tab-button" data-tool="⑤エリア特化商品選定ツール.html">
                         <span class="tab-number">5</span>エリア特化商品選定
                     </button>
                 </li>
                 <li class="tab-item">
-                    <button class="tab-button" data-tool="tool6">
+                    <button class="tab-button" data-tool="⑥ABC分析ツール.html">
                         <span class="tab-number">6</span>ABC分析
                     </button>
                 </li>
@@ -531,108 +531,59 @@
 
         <!-- コンテンツエリア -->
         <div class="content-area">
-            <!-- Tool 0: 棚割データ処理ツール -->
-            <div id="tool0" class="tool-section active">
-                <div class="tool-header">
-                    <h2>⓪ 棚割データ処理ツール</h2>
-                    <p>Excelファイルから棚割データを処理し、最適化されたフォーマットで出力します</p>
-                </div>
-                <div class="upload-area" data-tool="0">
-                    <p>Excelファイルをドラッグ&ドロップ または クリックして選択</p>
-                    <input type="file" accept=".xlsx,.xls" style="display:none;">
-                </div>
-                <div id="tool0Content"></div>
-            </div>
+            <div class="tool-section active">
+                <div style="max-width: 900px; margin: 40px auto; padding: 40px; text-align: center;">
+                    <h2 style="color: #1F5F8B; font-size: 28px; margin-bottom: 20px;">ようこそ</h2>
+                    <p style="font-size: 16px; line-height: 1.8; color: #666; margin-bottom: 40px;">
+                        カテゴリーマネージメントツール統合システムへようこそ。<br>
+                        上部のタブから使用したいツールを選択してください。
+                    </p>
 
-            <!-- Tool 1: 非定型月次データ可視化ツール -->
-            <div id="tool1" class="tool-section">
-                <div class="tool-header">
-                    <h2>① 非定型月次データ可視化ツール</h2>
-                    <p>月次データを様々な形式で可視化し、トレンド分析を行います</p>
-                </div>
-                <div class="upload-area" data-tool="1">
-                    <p>Excelファイルをドラッグ&ドロップ または クリックして選択</p>
-                    <input type="file" accept=".xlsx,.xls" style="display:none;">
-                </div>
-                <div id="tool1Content"></div>
-            </div>
+                    <div style="background: #f9f9f9; padding: 30px; border-radius: 8px; margin-bottom: 40px;">
+                        <h3 style="color: #333; font-size: 20px; margin-bottom: 20px;">利用可能なツール</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: left;">
+                            <div style="padding: 15px; background: white; border-radius: 4px; border-left: 4px solid #1F5F8B;">
+                                <strong style="color: #1F5F8B;">⓪ 棚割データ処理</strong>
+                                <p style="font-size: 13px; color: #666; margin-top: 5px;">Excelファイルから棚割データを処理</p>
+                            </div>
+                            <div style="padding: 15px; background: white; border-radius: 4px; border-left: 4px solid #1F5F8B;">
+                                <strong style="color: #1F5F8B;">① 非定型月次データ可視化</strong>
+                                <p style="font-size: 13px; color: #666; margin-top: 5px;">月次データのトレンド分析</p>
+                            </div>
+                            <div style="padding: 15px; background: white; border-radius: 4px; border-left: 4px solid #1F5F8B;">
+                                <strong style="color: #1F5F8B;">② 売上分解(ツリー)</strong>
+                                <p style="font-size: 13px; color: #666; margin-top: 5px;">ツリー構造での売上分解分析</p>
+                            </div>
+                            <div style="padding: 15px; background: white; border-radius: 4px; border-left: 4px solid #1F5F8B;">
+                                <strong style="color: #1F5F8B;">② 売上分解(表形式)</strong>
+                                <p style="font-size: 13px; color: #666; margin-top: 5px;">表形式での売上分解分析</p>
+                            </div>
+                            <div style="padding: 15px; background: white; border-radius: 4px; border-left: 4px solid #1F5F8B;">
+                                <strong style="color: #1F5F8B;">③ 顧客属性詳細分析</strong>
+                                <p style="font-size: 13px; color: #666; margin-top: 5px;">セグメント別の顧客特性分析</p>
+                            </div>
+                            <div style="padding: 15px; background: white; border-radius: 4px; border-left: 4px solid #1F5F8B;">
+                                <strong style="color: #1F5F8B;">④ Visual Benchmarking</strong>
+                                <p style="font-size: 13px; color: #666; margin-top: 5px;">視覚的なベンチマーク比較</p>
+                            </div>
+                            <div style="padding: 15px; background: white; border-radius: 4px; border-left: 4px solid #1F5F8B;">
+                                <strong style="color: #1F5F8B;">⑤ エリア特化商品選定</strong>
+                                <p style="font-size: 13px; color: #666; margin-top: 5px;">エリア別の最適商品選定</p>
+                            </div>
+                            <div style="padding: 15px; background: white; border-radius: 4px; border-left: 4px solid #1F5F8B;">
+                                <strong style="color: #1F5F8B;">⑥ ABC分析</strong>
+                                <p style="font-size: 13px; color: #666; margin-top: 5px;">商品のABC分類と重点管理</p>
+                            </div>
+                        </div>
+                    </div>
 
-            <!-- Tool 2A: 売上分解ツール(ツリー) -->
-            <div id="tool2a" class="tool-section">
-                <div class="tool-header">
-                    <h2>② 売上分解ツール(分解ツリーver)</h2>
-                    <p>売上をツリー構造で分解し、階層的に分析します</p>
+                    <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; border-left: 4px solid #1F5F8B;">
+                        <p style="font-size: 14px; color: #555; line-height: 1.6;">
+                            <strong>ご注意:</strong> 各ツールでは、このページで承認した外部ライブラリが自動的に読み込まれます。<br>
+                            追加の承認操作は不要です。
+                        </p>
+                    </div>
                 </div>
-                <div class="upload-area" data-tool="2a">
-                    <p>Excelファイルをドラッグ&ドロップ または クリックして選択</p>
-                    <input type="file" accept=".xlsx,.xls" style="display:none;">
-                </div>
-                <div id="tool2aContent"></div>
-            </div>
-
-            <!-- Tool 2B: 売上分解ツール(表形式) -->
-            <div id="tool2b" class="tool-section">
-                <div class="tool-header">
-                    <h2>② 売上分解ツール(表形式ver)</h2>
-                    <p>売上を表形式で分解し、詳細に分析します</p>
-                </div>
-                <div class="upload-area" data-tool="2b">
-                    <p>Excelファイルをドラッグ&ドロップ または クリックして選択</p>
-                    <input type="file" accept=".xlsx,.xls" style="display:none;">
-                </div>
-                <div id="tool2bContent"></div>
-            </div>
-
-            <!-- Tool 3: 顧客属性詳細分析ツール -->
-            <div id="tool3" class="tool-section">
-                <div class="tool-header">
-                    <h2>③ 顧客属性詳細分析ツール</h2>
-                    <p>顧客属性を詳細に分析し、セグメント別の特性を明らかにします</p>
-                </div>
-                <div class="upload-area" data-tool="3">
-                    <p>Excelファイルをドラッグ&ドロップ または クリックして選択</p>
-                    <input type="file" accept=".xlsx,.xls" style="display:none;">
-                </div>
-                <div id="tool3Content"></div>
-            </div>
-
-            <!-- Tool 4: Visual Benchmarking Tool -->
-            <div id="tool4" class="tool-section">
-                <div class="tool-header">
-                    <h2>④ Visual Benchmarking Tool</h2>
-                    <p>ベンチマーキングデータを視覚的に比較分析します</p>
-                </div>
-                <div class="upload-area" data-tool="4">
-                    <p>Excelファイルをドラッグ&ドロップ または クリックして選択</p>
-                    <input type="file" accept=".xlsx,.xls" style="display:none;">
-                </div>
-                <div id="tool4Content"></div>
-            </div>
-
-            <!-- Tool 5: エリア特化商品選定ツール -->
-            <div id="tool5" class="tool-section">
-                <div class="tool-header">
-                    <h2>⑤ エリア特化商品選定ツール</h2>
-                    <p>エリアごとの特性に合わせた商品選定を支援します</p>
-                </div>
-                <div class="upload-area" data-tool="5">
-                    <p>Excelファイルをドラッグ&ドロップ または クリックして選択</p>
-                    <input type="file" accept=".xlsx,.xls" style="display:none;">
-                </div>
-                <div id="tool5Content"></div>
-            </div>
-
-            <!-- Tool 6: ABC分析ツール -->
-            <div id="tool6" class="tool-section">
-                <div class="tool-header">
-                    <h2>⑥ ABC分析ツール</h2>
-                    <p>商品をABC分類し、重点管理対象を明確にします</p>
-                </div>
-                <div class="upload-area" data-tool="6">
-                    <p>Excelファイルをドラッグ&ドロップ または クリックして選択</p>
-                    <input type="file" accept=".xlsx,.xls" style="display:none;">
-                </div>
-                <div id="tool6Content"></div>
             </div>
         </div>
     </div>
@@ -699,6 +650,10 @@
             Promise.all(promises)
                 .then(() => {
                     librariesLoaded = true;
+                    // ライブラリ承認済みフラグをlocalStorageに保存
+                    localStorage.setItem('cmToolLibrariesApproved', 'true');
+                    localStorage.setItem('cmToolLibrariesApprovedTime', Date.now().toString());
+
                     document.getElementById('loadingMessage').classList.add('hidden');
                     document.getElementById('mainApp').classList.remove('hidden');
                     initializeApp();
@@ -753,63 +708,17 @@
 
         // アプリ初期化
         function initializeApp() {
-            // タブ切り替え
+            // タブ切り替え - 各ツールへナビゲート
             document.querySelectorAll('.tab-button').forEach(button => {
                 button.addEventListener('click', () => {
-                    const toolId = button.dataset.tool;
-                    switchTool(toolId);
+                    const toolFile = button.dataset.tool;
+                    // 各ツールへ遷移
+                    window.location.href = toolFile;
                 });
-            });
-
-            // ファイルアップロードエリアの初期化
-            document.querySelectorAll('.upload-area').forEach(area => {
-                const fileInput = area.querySelector('input[type="file"]');
-                const toolId = area.dataset.tool;
-
-                area.addEventListener('click', () => fileInput.click());
-                area.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    area.classList.add('dragover');
-                });
-                area.addEventListener('dragleave', () => area.classList.remove('dragover'));
-                area.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    area.classList.remove('dragover');
-                    handleFileUpload(e.dataTransfer.files[0], toolId);
-                });
-                fileInput.addEventListener('change', (e) => handleFileUpload(e.target.files[0], toolId));
             });
 
             console.log('アプリケーションを初期化しました');
-        }
-
-        // ツール切り替え
-        function switchTool(toolId) {
-            // すべてのタブボタンから active クラスを削除
-            document.querySelectorAll('.tab-button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-
-            // クリックされたタブボタンに active クラスを追加
-            document.querySelector(`[data-tool="${toolId}"]`).classList.add('active');
-
-            // すべてのツールセクションを非表示
-            document.querySelectorAll('.tool-section').forEach(section => {
-                section.classList.remove('active');
-            });
-
-            // 選択されたツールセクションを表示
-            document.getElementById(toolId).classList.add('active');
-        }
-
-        // ファイルアップロード処理
-        function handleFileUpload(file, toolId) {
-            if (!file) return;
-
-            console.log(`Tool ${toolId}: File uploaded - ${file.name}`);
-
-            // 各ツールごとのファイル処理を実装予定
-            // この部分は後続の実装で各ツールの機能を追加します
+            console.log('ライブラリ承認フラグをlocalStorageに保存しました');
         }
     </script>
 </body>

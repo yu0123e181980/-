@@ -605,6 +605,23 @@
 
         // ページ読み込み時の初期化
         document.addEventListener('DOMContentLoaded', function() {
+            // localStorageでライブラリ承認状態をチェック
+            const librariesApproved = localStorage.getItem('cmToolLibrariesApproved') === 'true';
+
+            if (!librariesApproved) {
+                // 未承認の場合、モーダルを表示 (既存のモーダルがある場合はそのまま)
+                // または、カテゴリーマネージメントツールに戻るよう案内
+                if (document.getElementById('libraryModal')) {
+                    document.getElementById('libraryModal').style.display = 'flex';
+                }
+            } else {
+                // 既に承認済みの場合、モーダルをスキップ
+                if (document.getElementById('libraryModal')) {
+                    document.getElementById('libraryModal').style.display = 'none';
+                    document.getElementById('mainContent').style.display = 'block';
+                }
+            }
+
             const uploadArea = document.getElementById('uploadArea');
             const fileInput = document.getElementById('fileInput');
             const processBtn = document.getElementById('processBtn');

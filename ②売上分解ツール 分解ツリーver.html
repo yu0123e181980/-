@@ -409,6 +409,14 @@
     </div>
     
     <script>
+        // localStorageでライブラリ承認状態をチェック
+        const librariesApproved = localStorage.getItem('cmToolLibrariesApproved') === 'true';
+
+        if (!librariesApproved) {
+            alert('カテゴリーマネージメントツールから起動してください。\n\n外部ライブラリの承認が必要です。');
+            window.location.href = 'カテゴリーマネージメントツール.html';
+        }
+
         let excelData = null;
         const hierarchyLevels = ['ディビジョン', 'ライン', '部門', 'カテゴリー', 'サブカテゴリー', 'セグメント', 'サブセグメント'];
         
